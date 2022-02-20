@@ -1,0 +1,3 @@
+#define NAV_ICON 101
+
+NAV_ICON ICON "nav_white_logo.ico"

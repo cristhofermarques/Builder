@@ -1,0 +1,3 @@
+C:\Users\crist\Documents\_projects\Builder\bin\Debug\net48\publish\Builder.exe
+C:\Users\crist\Documents\_projects\Builder\bin\Debug\net48\publish\Builder.exe.config
+C:\Users\crist\Documents\_projects\Builder\bin\Debug\net48\publish\Builder.pdb
