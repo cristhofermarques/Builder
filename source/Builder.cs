@@ -4,24 +4,32 @@ using System.Collections.Generic;
 
 public partial class Builder
 {
-    public Dictionary< string, string> settings;
+    bool fileReadOk = false, invalid = false;
+    string buildFileName = "";
     public List<Proj> projs;
 
     public Builder( string buildFilePath = "build.txt")
     {
+
+        buildFileName = buildFilePath;
         string buildStr;
-        if(! TryGetBuildFile( out buildStr, buildFilePath)){ return;}
+        if(! (fileReadOk = TryGetBuildFile( out buildStr, buildFilePath))){ return;}
         
+        if( ! buildStr.Contains("#proj")){ Console.WriteLine("No '#proj' Tag Defined in " + buildFileName); invalid = true; return;}
 
         List<string> projsStr = GetProjStr( buildStr);
-        
-        string[] headerPairsStr = GetValues( GetBuildFileHeader( buildStr), "#build_header");
-        settings = GetDictFromStrArray( headerPairsStr);
-        GetProjs( projsStr.ToArray());
+        if( projsStr != null && projsStr.Count > 0)
+            GetProjs( projsStr.ToArray());
     }
 
     public void Build(string[] inUserArgs)
     {
+        if( invalid){ return;}
+        if( projs == null || projs.Count < 0){ return;}
+        if(! fileReadOk){ Console.WriteLine( buildFileName + " Not Finded"); return;}
+
+        if( inUserArgs == null){ inUserArgs = new string[]{""};}
+
         List<Proj> listToBuild = new List<Proj>();
 
         for( int i = 0; i < projs.Count; i++)
@@ -50,7 +58,6 @@ public partial class Builder
             }
         }
     }
-
     public static string[] GetValues(string str, string fieldName)
     {
         if (str.Contains( fieldName))
@@ -83,7 +90,7 @@ public partial class Builder
     private bool TryGetBuildFile( out string dataStr, string dataName = "build.txt")
     {
         dataStr = string.Empty;
-        if (! File.Exists(dataName)) { return false;}
+        if (! File.Exists(dataName)) { Console.WriteLine(dataName + " Not Finded"); return false;}
 
         StreamReader file = new StreamReader(dataName);
         if (file == null) { return false; }
@@ -137,7 +144,10 @@ public partial class Builder
     }
     private string GetBuildFileHeader( string buildFileStr)
     {   
+        if(! buildFileStr.Contains("#proj")){ return string.Empty;}
+
         return buildFileStr.Substring(0, buildFileStr.IndexOf("#proj"));
+
     }
     private void GetProjs( string[] projsStr)
     {

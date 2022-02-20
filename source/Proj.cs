@@ -45,7 +45,7 @@ public class Proj
 
     public bool Build( string[] inUserArgs)
     {
-        bool isTest = false, isRls = false;
+        bool isTest = false, isRls = false, noClean = false;
 
         for( int i = 0; i < inUserArgs.Length; i++)
         {
@@ -58,6 +58,10 @@ public class Proj
                 case "-R":
                     isRls = true;
                 break;
+
+                case "-noclean":
+                    noClean = true;
+                break;
             }
         }
 
@@ -67,10 +71,11 @@ public class Proj
         string buildReturn;
         if( (buildReturn = BuildResource( isRls, isTest)) != string.Empty){ Print( buildReturn); return false;}
         if( buildObj){ if( (buildReturn = BuildObjects( isRls, isTest)) != string.Empty){ Print( buildReturn); return false;}}
-        if( (buildReturn = BuildBinary( isRls, isTest)) != string.Empty){ Print( buildReturn); return false;}
+        if( (buildReturn = BuildBinary( isRls, isTest, noClean)) != string.Empty){ Print( buildReturn); return false;}
+        if( !noClean){ CleanObjsFiles( isTest);}
 
-        if( !isTest)
-            ExecCompiler( "cmd" , "/c cls");
+        if( !isTest){}
+            //ExecCompiler( "cmd" , "/c cls");
         return true;
     }
 
@@ -243,7 +248,7 @@ public class Proj
         return string.Empty;
     }
 
-    string BuildBinary( bool isRls, bool isTest)
+    string BuildBinary( bool isRls, bool isTest, bool noClean)
     {
         string outFolder = name + @"\bin";
         if(! Directory.Exists( outFolder)){ Directory.CreateDirectory( outFolder);}
@@ -387,5 +392,25 @@ public class Proj
             }
         }
         return string.Empty;
+    }
+
+    void CleanObjsFiles( bool isTest)
+    {   
+        for( int i = 0; i < objs.Count; i++)
+        {
+            
+            if( File.Exists( objs[i]))
+            {
+                if( isTest)
+                {
+                    Print("cmd /c del " + objs[i]);
+                }
+                else
+                {
+                    ExecCompilerWithoutOutput( "cmd", "/c del " + objs[i]);
+                }
+            }
+        }
+        
     }
 }
